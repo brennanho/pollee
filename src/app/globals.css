@@ -1,14 +1,7 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FFF1EC;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 html,
 body {
@@ -17,11 +10,12 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* CSS Overrides */
+  /* background: var(--background) !important;  */
 }
 
 * {

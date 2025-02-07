@@ -1,5 +1,4 @@
 import AWS from "aws-sdk";
-import { v4 as uuid } from "uuid";
 
 export const DDB = new AWS.DynamoDB.DocumentClient({
   region: "us-east-1",
@@ -11,6 +10,9 @@ const POLLEE_VOTES_DDB_TABLE_NAME = "Pollee-Votes";
 type User = {
   id: string;
   name: string;
+  image: string;
+  generation?:  string;
+  gender?: string;
 }
 
 type Poll = {
@@ -19,6 +21,7 @@ type Poll = {
   title: string;
   answers: string[];
   description: string;
+  createdAt: number;
 }
 
 type Vote = {
@@ -41,7 +44,7 @@ export async function fetchUser(id: string): Promise<User | null> {
   }
 }
 
-export async function fetchPolls(): Promise<Poll[] | null> {
+export async function fetchPolls(): Promise<Poll[]> {
   const params = { TableName: POLLEE_POLLS_DDB_TABLE_NAME };
   try {
     const result = await DDB.scan(params).promise();
@@ -66,10 +69,10 @@ export async function fetchPoll(id: string): Promise<Poll | null> {
   }
 }
 
-export async function createUser(id: string, name: string, age: number) {
+export async function createUser({ id, name, image, gender, generation }: { id: string, name: string, image: string, gender: string, generation: string }) {
   const params = {
     TableName: POLLEE_USERS_TABLE_NAME,
-    Item: { id, name, age },
+    Item: { id, name, image, gender, generation },
   };
   try {
     await DDB.put(params).promise();
@@ -81,10 +84,10 @@ export async function createUser(id: string, name: string, age: number) {
 }
 
 export async function createPoll(userId: string, title: string, answers: string[], description: string) {
-  const id = uuid();
+  const id = crypto.randomUUID();
   const params = {
     TableName: POLLEE_POLLS_DDB_TABLE_NAME,
-    Item: { id, userId, title, answers, description },
+    Item: { id, userId, title, answers, description, createdAt: Date.now() },
   };
   try {
     await DDB.put(params).promise();
@@ -109,7 +112,7 @@ export async function createVote(userId: string, pollId: string, answer: string)
   }
 }
 
-export async function fetchPollsForUser(userId: string): Promise<Poll[] | null> {
+export async function fetchPollsForUser(userId: string): Promise<Poll[]> {
   const params = {
     TableName: POLLEE_POLLS_DDB_TABLE_NAME,
     FilterExpression: "userId = :userId",
@@ -140,7 +143,7 @@ export async function fetchVotesForUser(userId: string): Promise<Vote[] | null> 
   }
 }
 
-export async function fetchVotesForPoll(pollId: string): Promise<Vote[] | null> {
+export async function fetchVotesForPoll(pollId: string): Promise<Vote[]> {
   const params = {
     TableName: POLLEE_VOTES_DDB_TABLE_NAME,
     KeyConditionExpression: "pollId = :pollId",

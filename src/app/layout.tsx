@@ -1,18 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
+import { MantineProvider, AppShellHeader, AppShellMain } from "@mantine/core";
+import { Header } from "./components/Header";
+
 import "./globals.css";
-import Header from "./components/header";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import '@mantine/carousel/styles.css';
+import "@mantine/core/styles.css";
+import { AppShell } from "./appshell";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -26,10 +20,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <SessionProvider>
-          <Header />
-          {children}
+      <body>
+        <SessionProvider >
+          <MantineProvider>
+            <AppShell>
+              <AppShellHeader>
+                <Header />
+              </AppShellHeader>
+              <AppShellMain>{children}</AppShellMain>
+            </AppShell>
+          </MantineProvider>
         </SessionProvider>
       </body>
     </html>

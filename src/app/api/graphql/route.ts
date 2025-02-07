@@ -19,7 +19,9 @@ const typeDefs = /* GraphQL */ `
   type User {
     id: ID!
     name: String!
-    age: Int
+    generation: String
+    gender: String
+    image: String
     polls: [Poll!]
     votes: [Vote!]
   }
@@ -31,6 +33,7 @@ const typeDefs = /* GraphQL */ `
     title: String!
     answers: [String!]!
     description: String
+    createdAt: Float
     votes: [Vote!]
   }
 
@@ -47,7 +50,7 @@ const typeDefs = /* GraphQL */ `
   }
 
   type Mutation {
-    createUser(id: ID!, name: String!, age: Int): User
+    createUser(id: ID!, name: String!, generation: String, gender: String, image: String): User
     createPoll(userId: ID!, title: String!, answers: [String!]!, description: String): Poll
     createVote(userId: ID!, pollId: ID!, answer: String!): Vote
   }
@@ -58,7 +61,7 @@ type Context = {
 };
 
 // Context
-const context = async (request: Request) => {
+const context = async (request: Request): Promise<Context> => {
   const accessToken = request.headers.get("accessToken");
   return {
     accessToken,
@@ -81,11 +84,11 @@ const resolvers = {
   Mutation: {
     createUser: async (
       _: any,
-      { id, name, age }: { id: string; name: string; age: number },
+      { id, name, image, generation, gender }: { id: string; name: string; generation: string, gender: string, image: string },
       { accessToken }: Context
     ) => {
       if (!(await isUserAuthenticated(accessToken))) return null;
-      return await createUser(id, name, age);
+      return await createUser(id, name, image, gender, generation);
     },
     createPoll: async (
       _: any,

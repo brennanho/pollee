@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { Session } from "next-auth";
+import { createUser, fetchUser } from "./app/ddb";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -25,6 +26,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.accessToken = token.accessToken;
       }
       return session;
+    },
+    async signIn({ user }) {
+      if (user?.email) {
+        const ddbUser = await fetchUser(user.email);
+        if (!ddbUser) {
+          console.log(`Creating base user on firt signin: ${JSON.stringify(user)}`);
+          await createUser({ id: user.email, name: user.name || "", image: user.image || "", generation: "", gender: "" });
+        }
+        else console.log(`User already exists: ${JSON.stringify(user)}`);
+      }
+
+      return true;
     },
   },
 });

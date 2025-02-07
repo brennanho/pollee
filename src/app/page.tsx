@@ -1,33 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { PollFormModal, PollComp } from "./components/TestComponents";
+import { PollCard } from "./components/PollCard";
+import { CreatePollModal } from "./components/CreatePollModal";
+import { fetchGraphQL } from "./util";
+import { AppContext } from "./appshell";
 
-export default function Poll() {
+export default function Page() {
   const { data: session } = useSession();
-  const [user, setUser] = useState<any>(null);
+  const { user } = useContext(AppContext);
   const [polls, setPolls] = useState<any>(null);
-  const [selectedAnswer, setSelectedAnswer] = useState("");
-  const [isModalOpen, setModalOpen] = useState(false);
-
-  const handleOpenModal = () => setModalOpen(true);
-  const handleCloseModal = () => setModalOpen(false);
-
-  const fetchGraphQL = async (query: string, variables = {}) => {
-    console.log({session});
-    const response = await fetch("/api/graphql", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // @ts-ignore
-        accessToken: session?.accessToken,
-      },
-      body: JSON.stringify({ query, variables }),
-    });
-    const { data } = await response.json();
-    return data;
-  };
 
   const handlePollSubmit = async (poll: any) => {
     const query = `
@@ -40,38 +23,17 @@ export default function Poll() {
         }
       }
     `;
-    await fetchGraphQL(query, {
-      userId: user.id,
-      title: poll.title,
-      answers: poll.answers,
-      description: poll.description,
-    });
+    await fetchGraphQL(
+      query,
+      {
+        userId: user.id,
+        title: poll.title,
+        answers: poll.answers,
+        description: poll.description,
+      },
+      session?.accessToken
+    );
 
-    // Fetch updated polls
-    await fetchPolls();
-  };
-
-  const handleVote = async (poll: any) => {
-    if (!selectedAnswer) {
-      alert("Please select an answer before voting.");
-      return;
-    }
-    const query = `
-      mutation CreateVote($userId: ID!, $pollId: ID!, $answer: String!) {
-        createVote(userId: $userId, pollId: $pollId, answer: $answer) {
-          pollId
-          userId
-          answer
-        }
-      }
-    `;
-    await fetchGraphQL(query, {
-      userId: user.id,
-      pollId: poll.id,
-      answer: selectedAnswer,
-    });
-
-    // Fetch updated polls
     await fetchPolls();
   };
 
@@ -83,9 +45,11 @@ export default function Poll() {
           title
           answers
           description
+          createdAt
           user {
             id
             name
+            image
           }
           votes {
             userId
@@ -98,57 +62,16 @@ export default function Poll() {
     setPolls(data.polls);
   };
 
-  const fetchUser = async () => {
-    const query = `
-      query GetUser($id: ID!) {
-        user(id: $id) {
-          id
-          name
-          age
-        }
-      }
-    `;
-    const data = await fetchGraphQL(query, { id: session?.user?.email });
-    setUser(data.user);
-  };
-
   useEffect(() => {
-    async function fetchEverything() {
-      await fetchUser();
-      await fetchPolls();
-    }
-    if (session?.user) {
-      fetchEverything();
-    }
-  }, [session?.user]);
+    fetchPolls();
+  }, []);
 
   return (
     <div>
-      <h1>User</h1>
-      {JSON.stringify(user)}
-      <h1>Polls</h1>
-      <button onClick={handleOpenModal}>Create Poll</button>
-      <PollFormModal isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handlePollSubmit} />
       {polls?.map((poll: any) => {
-        console.log(poll);
-        return (
-          <div key={poll.id}>
-            <div>
-              <PollComp
-                poll={poll}
-                handleVote={handleVote}
-                handleAnswerUpdate={(answer: string) => setSelectedAnswer(answer)}
-              />
-              CREATOR: {poll.user.name}, ID: {poll.user.id}
-              {poll.votes.map((vote: any) => (
-                <div key={vote.userId}>
-                  USER: {vote.userId}, VOTE: {vote.answer}
-                </div>
-              ))}
-            </div>
-          </div>
-        );
+        return <PollCard poll={poll} voter={user} key={poll.id} />;
       })}
+      <CreatePollModal onSubmit={handlePollSubmit} />
     </div>
   );
 }
