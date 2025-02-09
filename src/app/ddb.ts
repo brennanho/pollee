@@ -1,4 +1,5 @@
 import AWS from "aws-sdk";
+import { v4 as randomUUID } from 'uuid';
 
 export const DDB = new AWS.DynamoDB.DocumentClient({
   region: "us-east-1",
@@ -84,7 +85,7 @@ export async function createUser({ id, name, image, gender, generation }: { id: 
 }
 
 export async function createPoll(userId: string, title: string, answers: string[], description: string) {
-  const id = crypto.randomUUID();
+  const id = randomUUID();
   const params = {
     TableName: POLLEE_POLLS_DDB_TABLE_NAME,
     Item: { id, userId, title, answers, description, createdAt: Date.now() },

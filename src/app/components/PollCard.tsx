@@ -16,6 +16,7 @@ import {
   Button,
   Avatar,
 } from "@mantine/core";
+import { v4 as randomUUID } from 'uuid';
 import { Carousel, CarouselSlide } from "@mantine/carousel";
 import { IconDotsVertical } from "@tabler/icons-react";
 import React, { useState } from "react";
@@ -91,7 +92,7 @@ export const PollCard = ({ poll, voter }: any) => {
           <RadioGroup name="poll-answer" value={selectedAnswer} onChange={setSelectedAnswer} withAsterisk>
             <Stack p="xs">
               {poll.answers.map((answer: string) => (
-                <Radio key={crypto.randomUUID()} value={answer} label={answer} />
+                <Radio key={randomUUID()} value={answer} label={answer} />
               ))}
             </Stack>
           </RadioGroup>

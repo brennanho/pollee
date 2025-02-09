@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { v4 as randomUUID } from 'uuid';
 import { Modal, Button, TextInput, Textarea, Group, ActionIcon, Stack, Grid, Affix } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
@@ -42,7 +43,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({ onSubmit }) =>
 
   const handleSubmit = () => {
     const poll: Poll = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       userId: session?.user?.email || "", // Replace with actual logged-in user's ID
       title,
       answers,

@@ -88,7 +88,7 @@ const resolvers = {
       { accessToken }: Context
     ) => {
       if (!(await isUserAuthenticated(accessToken))) return null;
-      return await createUser(id, name, image, gender, generation);
+      return await createUser({ id, name, image, gender, generation });
     },
     createPoll: async (
       _: any,
