@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { v4 as randomUUID } from 'uuid';
 import { Modal, Button, TextInput, Textarea, Group, ActionIcon, Stack, Grid, Affix } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
+import { AppContext } from "../appshell";
 
 type Poll = {
   id: string;
@@ -25,8 +25,8 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({ onSubmit }) =>
   const [newAnswer, setNewAnswer] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
 
-  const { data: session } = useSession();
-  
+  const { user } = useContext(AppContext);
+
   const handleOpenModal = () => setModalOpen(true);
   const handleCloseModal = () => setModalOpen(false);
   const handleAddAnswer = () => {
@@ -42,12 +42,17 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({ onSubmit }) =>
   };
 
   const handleSubmit = () => {
+    if (!user) {
+      alert(`User not defined: ${JSON.stringify(user)}`);
+      return;
+    }
+
     const poll: Poll = {
       id: randomUUID(),
-      userId: session?.user?.email || "", // Replace with actual logged-in user's ID
+      userId: user.id,
       title,
       answers,
-      description: description.trim() || undefined,
+      description: description?.trim(),
     };
 
     onSubmit(poll);

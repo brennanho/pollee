@@ -12,6 +12,7 @@ import {
   fetchVotesForPoll,
   fetchVotesForUser,
   isValidAnswer,
+  fetchVote,
 } from "@/app/ddb";
 
 // Type Definitions
@@ -45,6 +46,7 @@ const typeDefs = /* GraphQL */ `
 
   type Query {
     user(id: ID!): User
+    vote(pollId: ID!, userId: ID!): Vote
     polls: [Poll!]
     poll(id: ID!): Poll
   }
@@ -80,6 +82,9 @@ const resolvers = {
     poll: async (_: any, { id }: { id: string }) => {
       return await fetchPoll(id);
     },
+    vote: async (_: any, { userId, pollId }: {userId: string, pollId: string}) => {
+      return await fetchVote(userId, pollId);
+    }
   },
   Mutation: {
     createUser: async (

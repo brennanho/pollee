@@ -22,16 +22,16 @@ import { AppContext } from "../appshell";
 export function Header() {
   const { data: session } = useSession();
   const { user, setUser } = useContext(AppContext);
-  const [opened, setOpened] = useState(false);
-  const [userGender, setUserGender] = useState();
-  const [userGeneration, setUserGeneration] = useState("");
+  const [profileModalOpened, setProfileModalOpened] = useState(false);
+  const [userGender, setUserGender] = useState(user?.gender);
+  const [userGeneration, setUserGeneration] = useState(user?.generation);
 
   const createUser = async (userData: {
     id: string;
     name: string;
     generation: string;
     gender: string;
-    image?: string;
+    image: string;
   }) => {
     const query = `
       mutation CreateUser($id: ID!, $name: String!, $generation: String, $gender: String, $image: String) {
@@ -61,12 +61,17 @@ export function Header() {
   };
 
   const handleSubmitUser = async () => {
+    if (!user || !userGeneration || !userGender) {
+      alert(`User not defined: ${user}`);
+      return;
+    }
+
     const userData = {
-      id: user.id || "",
-      name: user.name || "",
-      generation: userGeneration || user.generation,
-      gender: userGender || user.gender,
-      image: user.image || "",
+      id: user.id,
+      name: user.name,
+      image: user.image,
+      generation: userGeneration,
+      gender: userGender,
     };
 
     const res = await createUser(userData);
@@ -80,70 +85,72 @@ export function Header() {
   const handleSignOut = () => {
     signOut();
   };
-  console.log(user.image)
+
   return (
     <Group justify="flex-end" h="100%" w="100%" pr="xs">
       <Menu>
         <MenuTarget>
-          <Avatar component="button" radius="xl" size="md" src={user.image} />
+          <Avatar component="button" radius="xl" size="md" src={user?.image} />
         </MenuTarget>
         <MenuDropdown>
           {session?.user ? (
             <>
               <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
-              <MenuItem onClick={() => setOpened(true)}>Profile</MenuItem>
+              <MenuItem onClick={() => setProfileModalOpened(true)}>Profile</MenuItem>
             </>
           ) : (
             <MenuItem onClick={handleSignIn}>Sign in</MenuItem>
           )}
         </MenuDropdown>
       </Menu>
-      <Modal
-        opened={opened}
-        onClose={() => setOpened(false)}
-        title={
-          <Group>
-            <Avatar size="sm" src={user.image} />
-            <Text>Profile</Text>
-          </Group>
-        }
-      >
-        <Stack>
-          <TextInput required disabled label="Name" placeholder="Name" value={user.name || ""} />
-          <TextInput required disabled label="Email" placeholder="Email" value={user.id || ""} />
-          <Select
-            data={[
-              { value: "Baby Boomer", label: "Baby Boomer, 1946 - 1964" },
-              { value: "Gen X", label: "Gen X, 1965 - 1980" },
-              { value: "Millenial", label: "Millenial, 1981 - 1996" },
-              { value: "Gen Z", label: "Gen Z, 1997 - 2010" },
-              { value: "Gen Alpha", label: "Gen Z, 2010 - 2024" },
-            ]}
-            value={user.generation || userGeneration}
-            disabled={!!user.generation}
-            label="Age Generation"
-            required
-            onChange={(updatedUserGeneration) => setUserGeneration(updatedUserGeneration)}
-          />
-          <Select
-            data={[
-              { value: "Male", label: "Male ♂" },
-              { value: "Female", label: "Female ♀" },
-              { value: "Other", label: "Other ⚥" },
-            ]}
-            value={user.gender || userGender}
-            disabled={!!user.gender}
-            label="Gender"
-            required
-            onChange={(updatedUserGender) => setUserGender(updatedUserGender)}
-          />
-          <Group justify="center">
-            <Button w="100px" mt="md" onClick={handleSubmitUser}>
-              SUBMIT
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
+      {user && (
+        <Modal
+          opened={profileModalOpened}
+          onClose={() => setProfileModalOpened(false)}
+          title={
+            <Group>
+              <Avatar size="sm" src={user.image} />
+              <Text>Profile</Text>
+            </Group>
+          }
+        >
+          <Stack>
+            <TextInput required disabled label="Name" placeholder="Name" value={user.name} />
+            <TextInput required disabled label="Email" placeholder="Email" value={user.id} />
+            <Select
+              data={[
+                { value: "Baby Boomer", label: "Baby Boomer, 1946 - 1964" },
+                { value: "Gen X", label: "Gen X, 1965 - 1980" },
+                { value: "Millenial", label: "Millenial, 1981 - 1996" },
+                { value: "Gen Z", label: "Gen Z, 1997 - 2010" },
+                { value: "Gen Alpha", label: "Gen Z, 2010 - 2024" },
+              ]}
+              value={user.generation || userGeneration}
+              disabled={!!user.generation}
+              label="Age Generation"
+              required
+              onChange={(updatedUserGeneration) => setUserGeneration(updatedUserGeneration)}
+            />
+            <Select
+              data={[
+                { value: "Male", label: "Male ♂" },
+                { value: "Female", label: "Female ♀" },
+                { value: "Other", label: "Other ⚥" },
+              ]}
+              value={user.gender || userGender}
+              disabled={!!user.gender}
+              label="Gender"
+              required
+              onChange={(updatedUserGender) => setUserGender(updatedUserGender)}
+            />
+            <Group justify="center">
+              <Button w="100px" mt="md" onClick={handleSubmitUser}>
+                SUBMIT
+              </Button>
+            </Group>
+          </Stack>
+        </Modal>
+      )}
     </Group>
   );
 }

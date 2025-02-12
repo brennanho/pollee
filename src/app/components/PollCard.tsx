@@ -16,19 +16,29 @@ import {
   Button,
   Avatar,
 } from "@mantine/core";
-import { v4 as randomUUID } from 'uuid';
+import { v4 as randomUUID } from "uuid";
 import { Carousel, CarouselSlide } from "@mantine/carousel";
 import { IconDotsVertical } from "@tabler/icons-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { fetchGraphQL, getTimeElapsed } from "../util";
 import { useSession } from "next-auth/react";
+import { useVote, Vote } from "../hooks/useVote";
 
 export const PollCard = ({ poll, voter }: any) => {
-  const [selectedAnswer, setSelectedAnswer] = useState("");
+  const { vote, setVote } = useVote(poll?.id, voter?.id);
+  const [selectedVoteAnswer, setSelectedVoteAnswer] = useState<string | undefined>();
   const { data: session } = useSession();
 
-  const handleVote = async (poll: any) => {
-    if (!selectedAnswer) {
+  useEffect(() => {
+    setSelectedVoteAnswer(vote?.answer);
+  }, [vote?.answer]);
+
+  const handleVote = async () => {
+    if (vote?.answer) {
+      alert(`User has already voted with answer: ${vote.answer}`);
+      return;
+    }
+    if (!selectedVoteAnswer) {
       alert("Please select an answer before voting.");
       return;
     }
@@ -45,15 +55,16 @@ export const PollCard = ({ poll, voter }: any) => {
           }
         }
       `;
-    await fetchGraphQL(
+    const { createVote }: { createVote: Vote } = await fetchGraphQL(
       query,
       {
         userId: voter.id,
         pollId: poll.id,
-        answer: selectedAnswer,
+        answer: selectedVoteAnswer,
       },
       session.accessToken
     );
+    setVote(createVote);
   };
 
   return (
@@ -89,15 +100,26 @@ export const PollCard = ({ poll, voter }: any) => {
           <Text mt="sm" c="dimmed" size="sm">
             {poll.description}
           </Text>
-          <RadioGroup name="poll-answer" value={selectedAnswer} onChange={setSelectedAnswer} withAsterisk>
+          <RadioGroup
+            value={selectedVoteAnswer}
+            defaultValue={vote?.answer}
+            defaultChecked
+            onChange={setSelectedVoteAnswer}
+            withAsterisk
+          >
             <Stack p="xs">
               {poll.answers.map((answer: string) => (
-                <Radio key={randomUUID()} value={answer} label={answer} />
+                <Radio
+                  key={`${answer}-${poll?.id}-${randomUUID()}`}
+                  value={answer}
+                  label={answer}
+                  disabled={!!vote?.answer}
+                />
               ))}
             </Stack>
           </RadioGroup>
           <Group justify="center">
-            <Button onClick={handleVote} w="80px">
+            <Button onClick={handleVote} w="80px" disabled={!!vote?.answer}>
               VOTE
             </Button>
           </Group>

@@ -70,6 +70,20 @@ export async function fetchPoll(id: string): Promise<Poll | null> {
   }
 }
 
+export async function fetchVote(pollId: string, userId: string): Promise<Vote | null> {
+  const params = {
+    TableName: POLLEE_VOTES_DDB_TABLE_NAME,
+    Key: { userId, pollId },
+  };
+  try {
+    const result = await DDB.get(params).promise();
+    return result.Item as Vote;
+  } catch (error) {
+    console.error("Error fetching vote:", error);
+    return null;
+  }
+}
+
 export async function createUser({ id, name, image, gender, generation }: { id: string, name: string, image: string, gender: string, generation: string }) {
   const params = {
     TableName: POLLEE_USERS_TABLE_NAME,
