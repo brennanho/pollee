@@ -5,17 +5,10 @@ import { v4 as randomUUID } from 'uuid';
 import { Modal, Button, TextInput, Textarea, Group, ActionIcon, Stack, Grid, Affix } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { AppContext } from "../appshell";
-
-type Poll = {
-  id: string;
-  userId: string;
-  title: string;
-  answers: string[];
-  description?: string;
-};
+import { Poll } from "../types";
 
 interface CreatePollModalProps {
-  onSubmit: (poll: Poll) => void;
+  onSubmit: (poll: Poll) => Promise<void>;
 }
 
 export const CreatePollModal: React.FC<CreatePollModalProps> = ({ onSubmit }) => {

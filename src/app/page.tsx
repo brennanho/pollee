@@ -6,13 +6,19 @@ import { PollCard } from "./components/PollCard";
 import { CreatePollModal } from "./components/CreatePollModal";
 import { fetchGraphQL } from "./util";
 import { AppContext } from "./appshell";
+import { Poll, PollQuery } from "./types";
 
 export default function Page() {
   const { data: session } = useSession();
   const { user } = useContext(AppContext);
-  const [polls, setPolls] = useState<any>(null);
+  const [polls, setPolls] = useState<PollQuery[]>([]);
 
-  const handlePollSubmit = async (poll: any) => {
+  const handlePollSubmit = async (poll: Poll) => {
+    if (!user) {
+      alert("User not defined");
+      return;
+    }
+
     const query = `
       mutation CreatePoll($userId: ID!, $title: String!, $answers: [String!]!, $description: String) {
         createPoll(userId: $userId, title: $title, answers: $answers, description: $description) {
@@ -51,10 +57,20 @@ export default function Page() {
             name
             image
           }
-          votes {
-            userId
-            answer
-          }
+          
+          totalVotesCount
+          answer1Count
+          answer2Count
+          answer3Count
+          answer4Count
+          answer1MaleCount
+          answer2MaleCount
+          answer3MaleCount
+          answer4MaleCount
+          answer1FemaleCount
+          answer2FemaleCount
+          answer3FemaleCount
+          answer4FemaleCount
         }
       }
     `;

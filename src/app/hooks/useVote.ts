@@ -1,18 +1,13 @@
 import { useEffect, useState } from "react";
 import { fetchGraphQL } from "../util";
+import { Vote } from "../types";
 
-export type Vote = {
-    userId: string;
-    pollId: string;
-    answer: string;
-}
+export function useVote(pollId: string | undefined, userId: string | undefined) {
+  const [vote, setVote] = useState<Vote | null>(null);
 
-export function useVote(userId: string, pollId: string) {
-    const [vote, setVote] = useState<Vote | null>(null);
-
-    useEffect(() => {
-        const fetchVote = async () => {
-            const query = `
+  useEffect(() => {
+    const fetchVote = async () => {
+      const query = `
         query GetVote($pollId: ID!, $userId: ID!) {
           vote(pollId: $pollId, userId: $userId) {
             userId
@@ -21,12 +16,11 @@ export function useVote(userId: string, pollId: string) {
           }
         }
       `;
-            const data = await fetchGraphQL(query, { userId, pollId });
-            setVote(data.vote);
-        };
+      const data = await fetchGraphQL(query, { pollId, userId });
+      setVote(data.vote);
+    };
+    if (userId && pollId) fetchVote();
+  }, [userId, pollId]);
 
-        if (!userId && !pollId) fetchVote();
-    }, [userId, pollId]);
-
-    return { vote, setVote };
+  return { vote, setVote };
 }

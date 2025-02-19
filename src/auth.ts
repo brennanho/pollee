@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { Session } from "next-auth";
-import { createUser, fetchUser } from "./app/ddb";
+import { createUser, fetchUser } from "./app/api/ddb";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [

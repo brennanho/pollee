@@ -6,7 +6,7 @@ import { User, useUser } from "./hooks/useUser";
 
 type AppContextType = {
   user: User | null;
-  setUser: (user: any) => void;
+  setUser: (user: User) => void;
 };
 
 export const AppContext = createContext<AppContextType>({ user: null, setUser: () => null });

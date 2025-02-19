@@ -13,7 +13,7 @@ import {
   fetchVotesForUser,
   isValidAnswer,
   fetchVote,
-} from "@/app/ddb";
+} from "@/app/api/ddb";
 
 // Type Definitions
 const typeDefs = /* GraphQL */ `
@@ -36,6 +36,21 @@ const typeDefs = /* GraphQL */ `
     description: String
     createdAt: Float
     votes: [Vote!]
+
+    # Results
+    totalVotesCount: Int
+    answer1Count: Int
+    answer2Count: Int
+    answer3Count: Int
+    answer4Count: Int
+    answer1MaleCount: Int
+    answer2MaleCount: Int
+    answer3MaleCount: Int
+    answer4MaleCount: Int
+    answer1FemaleCount: Int
+    answer2FemaleCount: Int
+    answer3FemaleCount: Int
+    answer4FemaleCount: Int
   }
 
   type Vote {
@@ -82,8 +97,8 @@ const resolvers = {
     poll: async (_: any, { id }: { id: string }) => {
       return await fetchPoll(id);
     },
-    vote: async (_: any, { userId, pollId }: {userId: string, pollId: string}) => {
-      return await fetchVote(userId, pollId);
+    vote: async (_: any, { userId, pollId }: { userId: string, pollId: string }) => {
+      return await fetchVote(pollId, userId);
     }
   },
   Mutation: {

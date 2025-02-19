@@ -2,14 +2,6 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { fetchGraphQL } from "../util";
 
-export type User = {
-  id: string;
-  name: string;
-  image: string;
-  generation?: string;
-  gender?: string;
-}
-
 export function useUser() {
   const { data: session } = useSession();
   const [user, setUser] = useState<User | null>(null);
