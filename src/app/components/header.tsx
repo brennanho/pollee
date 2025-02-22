@@ -19,7 +19,7 @@ import { useContext, useState } from "react";
 import { fetchGraphQL } from "../util";
 import { AppContext } from "../appshell";
 
-export function Header() {
+export const Header = () => {
   const { data: session } = useSession();
   const { user, setUser } = useContext(AppContext);
   const [profileModalOpened, setProfileModalOpened] = useState(false);
@@ -54,6 +54,7 @@ export function Header() {
         gender: userData.gender,
         image: userData.image,
       },
+      // @ts-expect-error TEMPORARY FIX
       session?.accessToken
     );
 
@@ -129,7 +130,7 @@ export function Header() {
               disabled={!!user.generation}
               label="Age Generation"
               required
-              onChange={(updatedUserGeneration) => setUserGeneration(updatedUserGeneration)}
+              onChange={(updatedUserGeneration) => updatedUserGeneration && setUserGeneration(updatedUserGeneration)}
             />
             <Select
               data={[
@@ -141,7 +142,7 @@ export function Header() {
               disabled={!!user.gender}
               label="Gender"
               required
-              onChange={(updatedUserGender) => setUserGender(updatedUserGender)}
+              onChange={(updatedUserGender) => updatedUserGender && setUserGender(updatedUserGender)}
             />
             <Group justify="center">
               <Button w="100px" mt="md" onClick={handleSubmitUser}>
@@ -153,4 +154,4 @@ export function Header() {
       )}
     </Group>
   );
-}
+};

@@ -37,6 +37,7 @@ export default function Page() {
         answers: poll.answers,
         description: poll.description,
       },
+      // @ts-expect-error TEMPORARY FIX
       session?.accessToken
     );
 
@@ -84,7 +85,7 @@ export default function Page() {
 
   return (
     <div>
-      {polls?.map((poll: any) => {
+      {polls?.map((poll: PollQuery) => {
         return <PollCard poll={poll} voter={user} key={poll.id} />;
       })}
       <CreatePollModal onSubmit={handlePollSubmit} />

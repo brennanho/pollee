@@ -14,6 +14,7 @@ import {
   isValidAnswer,
   fetchVote,
 } from "@/app/api/ddb";
+import { NextRequest } from "next/server";
 
 // Type Definitions
 const typeDefs = /* GraphQL */ `
@@ -88,22 +89,22 @@ const context = async (request: Request): Promise<Context> => {
 // Updated Resolvers
 const resolvers = {
   Query: {
-    user: async (_: any, { id }: { id: string }) => {
+    user: async (_: unknown, { id }: { id: string }) => {
       return await fetchUser(id);
     },
     polls: async () => {
       return await fetchPolls();
     },
-    poll: async (_: any, { id }: { id: string }) => {
+    poll: async (_: unknown, { id }: { id: string }) => {
       return await fetchPoll(id);
     },
-    vote: async (_: any, { userId, pollId }: { userId: string, pollId: string }) => {
+    vote: async (_: unknown, { userId, pollId }: { userId: string, pollId: string }) => {
       return await fetchVote(pollId, userId);
     }
   },
   Mutation: {
     createUser: async (
-      _: any,
+      _: unknown,
       { id, name, image, generation, gender }: { id: string; name: string; generation: string, gender: string, image: string },
       { accessToken }: Context
     ) => {
@@ -111,7 +112,7 @@ const resolvers = {
       return await createUser({ id, name, image, gender, generation });
     },
     createPoll: async (
-      _: any,
+      _: unknown,
       {
         userId,
         title,
@@ -124,7 +125,7 @@ const resolvers = {
       return await createPoll(userId, title, answers, description);
     },
     createVote: async (
-      _: any,
+      _: unknown,
       { userId, pollId, answer }: { userId: string; pollId: string; answer: string },
       { accessToken }: Context
     ) => {
@@ -162,4 +163,11 @@ const server = new ApolloServer({
 
 const handler = startServerAndCreateNextHandler(server, { context });
 
-export { handler as GET, handler as POST };
+export async function GET(req: NextRequest) {
+  return handler(req);
+}
+
+export async function POST(req: NextRequest) {
+  return handler(req);
+}
+

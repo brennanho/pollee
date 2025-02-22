@@ -22,7 +22,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async session({ session, token }): Promise<Session> {
       if (token?.accessToken) {
-        // @ts-ignore
+        // @ts-expect-error TEMPORARY FIX
         session.accessToken = token.accessToken;
       }
       return session;
@@ -44,7 +44,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 export async function isUserAuthenticated(clientAccessToken: string | null) {
   if (!clientAccessToken) return false;
-  // @ts-ignore
+  // @ts-expect-error TEMPORARY FIX
   const { accessToken: accessTokenServer } = await auth();
   return accessTokenServer === clientAccessToken;
 }

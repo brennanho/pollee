@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { fetchGraphQL } from "../util";
+import { User } from "../types";
 
 export function useUser() {
   const { data: session } = useSession();
@@ -20,12 +21,14 @@ export function useUser() {
           }
         }
       `;
-      const data = await fetchGraphQL(query, { id: session.user.email }, session.accessToken);
+      // @ts-expect-error TEMPORARY FIX
+      const data = await fetchGraphQL(query, { id: session.user.email }, session?.accessToken);
       setUser(data.user);
     };
 
     fetchUser();
-  }, [session?.user]);
+    // @ts-expect-error TEMPORARY FIX
+  }, [session?.user, session?.accessToken]);
 
   return { user, setUser };
 }

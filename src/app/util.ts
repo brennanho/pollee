@@ -11,7 +11,6 @@ export async function fetchGraphQL(query: string, variables = {}, accessToken = 
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // @ts-ignore
       accessToken,
     },
     body: JSON.stringify({ query, variables }),
