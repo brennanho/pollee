@@ -28,16 +28,6 @@ import { useSession } from "next-auth/react";
 import { useVote } from "../hooks/useVote";
 import { PollQuery, User, Vote } from "../types";
 
-interface CardSectionBodyProps {
-  children: React.ReactNode;
-}
-
-const CardSectionBody = ({ children }: CardSectionBodyProps) => (
-  <CardSection p="lg" h="100%">
-    {children}
-  </CardSection>
-);
-
 const VOTE_MUTATION = `
   mutation CreateVote($userId: ID!, $pollId: ID!, $answer: String!) {
     createVote(userId: $userId, pollId: $pollId, answer: $answer) {
@@ -57,16 +47,24 @@ const PollHeader = ({ poll }: PollHeaderProps) => (
     <Group justify="space-between">
       <Group gap="xs">
         <Avatar src={poll?.user?.image} size="sm" />
-        <Text c="white" fw={700}>
+        <Text
+          c="white"
+          fw={700}
+          truncate
+          style={{
+            fontSize: "clamp(14px, 2vw, 16px)",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
           {poll.title}
         </Text>
       </Group>
-      <Group gap="4px" bg="blue.5">
-        {poll?.totalVotesCount && (
-          <Badge bg="blue.5" leftSection={<IconUsers size={16} color="white" />}>
-            {poll.totalVotesCount}
-          </Badge>
-        )}
+      <Group gap="0" bg="blue.5">
+        <Badge bg="blue.5" leftSection={<IconUsers size={16} color="white" />}>
+          {poll.totalVotesCount || 0}
+        </Badge>
         <Text c="white" size="xs">
           {getTimeElapsed(poll.createdAt)}
         </Text>
@@ -94,7 +92,7 @@ interface VotingSectionProps {
 }
 
 const VotingSection = ({ poll, vote, selectedVoteAnswer, setSelectedVoteAnswer, handleVote }: VotingSectionProps) => (
-  <CardSectionBody>
+  <CardSection p="lg">
     <Text mt="sm" c="dimmed" size="sm">
       {poll.description}
     </Text>
@@ -107,12 +105,15 @@ const VotingSection = ({ poll, vote, selectedVoteAnswer, setSelectedVoteAnswer, 
     >
       <Stack p="xs">
         {poll.answers.map((answer: string, idx: number) => {
-          const percentage = Math.round((poll[`answer${idx + 1}Count` as keyof PollQuery] as number / (poll?.totalVotesCount || 1)) * 100) || 0;
+          const percentage =
+            Math.round(
+              ((poll[`answer${idx + 1}Count` as keyof PollQuery] as number) / (poll?.totalVotesCount || 1)) * 100
+            ) || 0;
           return (
             <Group key={`${answer}-${poll?.id}-${randomUUID()}`} justify="space-between">
               <Radio value={answer} label={answer} disabled={!!vote?.answer} />
-              <Progress.Root w="50%">
-                <Progress.Section color="blue.2" value={percentage}>
+              <Progress.Root w="50%" h="100%">
+                <Progress.Section color="blue.2" value={percentage} h={15}>
                   <Progress.Label>{percentage}%</Progress.Label>
                 </Progress.Section>
               </Progress.Root>
@@ -126,7 +127,7 @@ const VotingSection = ({ poll, vote, selectedVoteAnswer, setSelectedVoteAnswer, 
         VOTE
       </Button>
     </Group>
-  </CardSectionBody>
+  </CardSection>
 );
 
 interface GenderResultsSectionProps {
@@ -134,7 +135,7 @@ interface GenderResultsSectionProps {
 }
 
 const GenderResultsSection = ({ poll }: GenderResultsSectionProps) => (
-  <CardSectionBody>
+  <CardSection p="lg" w="100%" h="100%">
     <BarChart
       h={150}
       p="xs"
@@ -148,7 +149,7 @@ const GenderResultsSection = ({ poll }: GenderResultsSectionProps) => (
         { name: "Female", color: "red.6" },
       ]}
     />
-  </CardSectionBody>
+  </CardSection>
 );
 
 const transformPollDataForBarChart = (poll: PollQuery) =>
@@ -212,9 +213,11 @@ export const PollCard = ({ poll, voter }: { poll: PollQuery; voter: User | null 
             handleVote={handleVote}
           />
         </Carousel.Slide>
-        <Carousel.Slide>
-          <GenderResultsSection poll={poll} />
-        </Carousel.Slide>
+        {poll?.totalVotesCount && (
+          <Carousel.Slide style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <GenderResultsSection poll={poll} />
+          </Carousel.Slide>
+        )}
       </Carousel>
     </Card>
   );
